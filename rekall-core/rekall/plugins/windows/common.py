@@ -1,6 +1,7 @@
 # Rekall Memory Forensics
 #
 # Copyright 2013 Google Inc. All Rights Reserved.
+# Copyright (C) 2017 FireEye, Inc. All Rights Reserved.
 #
 # Authors:
 # Michael Cohen <scudette@users.sourceforge.net>
@@ -424,6 +425,9 @@ class WinProcessFilter(WindowsCommandPlugin):
         dict(name="pids", positional=True, type="ArrayIntParser", default=[],
              help="One or more pids of processes to select."),
 
+        dict(name="dtbs", default=None, type="ArrayIntParser",
+             help="One or more DTBs of processes to select."),
+
         dict(name="proc_regex", default=None, type="RegEx",
              help="A regex to select a process by name."),
 
@@ -434,7 +438,7 @@ class WinProcessFilter(WindowsCommandPlugin):
     @utils.safe_property
     def filtering_requested(self):
         return (self.plugin_args.pids or self.plugin_args.proc_regex or
-                self.plugin_args.eprocess)
+                self.plugin_args.eprocess or self.plugin_args.dtbs)
 
     def filter_processes(self):
         """Filters eprocess list using pids lists."""
@@ -450,6 +454,10 @@ class WinProcessFilter(WindowsCommandPlugin):
 
                 else:
                     if int(proc.pid) in self.plugin_args.pids:
+                        yield proc
+
+                    elif (self.plugin_args.dtbs and
+                          (int(proc.Pcb.DirectoryTableBase) in self.plugin_args.dtbs)):
                         yield proc
 
                     elif (self.plugin_args.proc_regex and

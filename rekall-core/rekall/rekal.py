@@ -3,6 +3,7 @@
 # Rekall
 # Copyright (C) 2012 Michael Cohen <scudette@gmail.com>
 # Copyright 2013 Google Inc. All Rights Reserved.
+# Copyright (C) 2017 FireEye, Inc. All Rights Reserved.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -98,6 +99,7 @@ def main(argv=None):
     # Install any quotas the user requested.
     user_session = quotas.wrap_session(user_session)
     try:
+        user_session.plugins.load_as().GetPhysicalAddressSpace()
         # Run the plugin with plugin specific args.
         user_session.RunPlugin(plugin_cls, **config.RemoveGlobalOptions(flags))
     except Exception as e:

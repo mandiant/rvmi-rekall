@@ -1,6 +1,7 @@
 # Rekall Memory Forensics
 # Copyright (C) 2012 Michael Cohen
 # Copyright 2013 Google Inc. All Rights Reserved.
+# Copyright (C) 2017 FireEye, Inc. All Rights Reserved.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -548,6 +549,10 @@ class Session(object):
     def __init__(self, **kwargs):
         self.progress = ProgressDispatcher()
 
+        # This member stores the VMI class if available
+        # It is set by the physical address space
+        self.vmi = None
+
         # Cache the profiles we get from LoadProfile() below.
         self.profile_cache = {}
 
@@ -681,6 +686,8 @@ class Session(object):
         cache_type = self.GetParameter("cache", "memory")
         if self.volatile:
             cache_type = "timed"
+        if self.vmi:
+            cache_type = "periodic"
 
         if self.cache:
             self.remove_flush_hook(self.cache)
@@ -688,7 +695,6 @@ class Session(object):
         self.cache = cache.Factory(self, cache_type)
         if self.physical_address_space:
             self.physical_address_space.ConfigureSession(self)
-
         # Fix up the completer. This is sometimes required after the debugger
         # steals readline focus. Typing session.Reset() fixes things again.
         self.shell.init_completer()
@@ -863,6 +869,9 @@ class Session(object):
                 self.last = plugin_obj
             except (Exception, KeyboardInterrupt) as e:
                 self._HandleRunPluginException(ui_renderer, e)
+
+                if isinstance(e, KeyboardInterrupt):
+                    raise KeyboardInterrupt
 
             finally:
                 self.renderers.pop(-1)

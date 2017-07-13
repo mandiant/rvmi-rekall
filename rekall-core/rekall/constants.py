@@ -1,6 +1,7 @@
 # Rekall Memory Forensics
 # Copyright (C) 2008 Volatile Systems
 # Copyright 2013 Google Inc. All Rights Reserved.
+# Copyright (C) 2017 FireEye, Inc. All Rights Reserved.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,6 +22,9 @@ from rekall import _version
 
 VERSION = _version.get_versions()["pep440"]
 CODENAME = _version.get_versions()["codename"]
+RVMI_VERSION = _version.get_versions()["rvmi_version"]
+RVMI_CODENAME = _version.get_versions()["rvmi_codename"]
+
 SCAN_BLOCKSIZE = 1024 * 1024 * 10
 
 # Official profile repository locations. We create the initial .rekallrc from
@@ -50,6 +54,7 @@ PROFILE_REPOSITORY_VERSION = "v1.0"
 BANNER = """
 ----------------------------------------------------------------------------
 The Rekall Digital Forensic/Incident Response framework %s (%s).
+For the memory of a lifetime, now with rVMI %s (%s).
 
 "We can remember it for you wholesale!"
 
@@ -57,8 +62,9 @@ This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License.
 
 See http://www.rekall-forensic.com/docs/Manual/tutorial.html to get started.
+Or https://github.com/fireeye for more info about rVMI.
 ----------------------------------------------------------------------------
-""" % (VERSION, CODENAME)
+""" % (VERSION, CODENAME, RVMI_VERSION, RVMI_CODENAME)
 
 QUOTES = [
     "Baby, you make me wish I had three hands.",

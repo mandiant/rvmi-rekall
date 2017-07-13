@@ -16,3 +16,4 @@ from rekall.plugins import response
 from rekall.plugins import overlays
 from rekall.plugins import tools
 from rekall.plugins import windows
+from rekall.plugins import vmi

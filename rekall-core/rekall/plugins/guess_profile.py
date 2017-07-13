@@ -1,6 +1,7 @@
 # Rekall Memory Forensics
 # Copyright (C) 2014 Michael Cohen
 # Copyright 2014 Google Inc. All Rights Reserved.
+# Copyright (C) 2017 FireEye, Inc. All Rights Reserved.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,6 +41,7 @@ from rekall.plugins.darwin import common as darwin_common
 from rekall.plugins.linux import common as linux_common
 from rekall.plugins.windows import common as win_common
 from rekall.plugins.overlays.windows import pe_vtypes
+from rekall.plugins.vmi import common as vmi_common
 
 
 class DetectionMethod(object):
@@ -49,6 +51,9 @@ class DetectionMethod(object):
     name = None
 
     order = 100
+
+    # Try this method if nothing else worked
+    fallback = False
 
     def __init__(self, session=None):
         self.session = session
@@ -592,6 +597,73 @@ class DarwinIndexDetector(DetectionMethod):
 
                 return profile
 
+class VMIBaseDetector(DetectionMethod):
+    """Provides a default profile for VMI.
+
+    In case of VMI, we may want to analyze the VM while the OS has not been
+    fully loaded yet. When no OS profile is detected, but VMI is enabled
+    we will provide a default address space based on the registers of the
+    machine.
+    """
+
+    name = "vmi"
+    fallback = True
+
+    find_dtb_impl = vmi_common.VMIFindDTB
+
+    def __init__(self, **kwargs):
+        super(VMIBaseDetector, self).__init__(**kwargs)
+
+    def Offsets(self):
+        return [42]
+
+    def _ApplyFindDTB(self, find_dtb_cls, profile):
+        self.session.profile = profile
+        find_dtb_plugin = find_dtb_cls(session=self.session)
+
+        dtb = find_dtb_plugin.dtb_hits()[0]
+        address_space = find_dtb_plugin.CreateAS(dtb)
+        self.session.SetCache(
+            "default_address_space", address_space, volatile=False)
+
+        return profile
+
+    def DetectFromHit(self, hit, offset, address_space):
+        if not self.session.GetParameter("mode_vmi", default=False):
+            # This is not a VMI instance.
+            return
+
+        # Set the paging mode
+        state = self.session.vmi.guest_state.get_cpu_state()
+        cr0 = state["cr0"]
+        cr4 = state["cr4"]
+        efer = state["efer"]
+
+        if offset == 42 and (cr0 & (1 << 31)):
+            # Paging is enabled. Lets try the user profiles first
+            # and wait for the fallback
+            return
+
+        # Create a profile
+        profile = obj.Profile.LoadProfileFromData({}, session=self.session,
+                                                  name="VMI")
+
+        if (not (cr0 & (1 << 31))):
+            profile.set_metadata("arch", "I386")
+            profile.set_metadata("paging", False)
+        elif (not (cr4 & (1 << 5))):
+            profile.set_metadata("arch", "I386")
+            profile.set_metadata("paging", True)
+        elif (not (efer & (1 << 8))):
+            profile.set_metadata("arch", "I386")
+            profile.set_metadata("pae", True)
+            profile.set_metadata("paging", True)
+        else:
+            profile.set_metadata("arch", "AMD64")
+            profile.set_metadata("paging", True)
+
+        return self._ApplyFindDTB(self.find_dtb_impl, profile)
+
 
 class KernelASHook(kb.ParameterHook):
     """A ParameterHook for default_address_space.
@@ -634,6 +706,7 @@ class ProfileHook(kb.ParameterHook):
         methods = []
         needles = []
         needle_lookup = {}
+        fallback = []
 
         method_names = self.session.GetParameter("autodetect")
 
@@ -665,6 +738,9 @@ class ProfileHook(kb.ParameterHook):
                         method.name, profile)
                     return profile
 
+            if hasattr(method, "fallback") and method.fallback:
+                fallback.append(method)
+
         # 10 GB by default.
         autodetect_scan_length = self.session.GetParameter(
             "autodetect_scan_length", 10*1024*1024*1024)
@@ -693,6 +769,13 @@ class ProfileHook(kb.ParameterHook):
 
         threshold = self.session.GetParameter("autodetect_threshold")
         if best_match == 0:
+            for f in fallback:
+                profile = f.DetectFromHit(None, 0, address_space)
+                if profile:
+                    self.session.logging.debug(
+                        "Using fallback profile %s", f.name)
+                    return profile
+
             self.session.logging.error(
                 "No profiles match this image. Try specifying manually.")
 

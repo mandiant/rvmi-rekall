@@ -12,10 +12,12 @@ def get_versions():
 def raw_versions():
     return json.loads("""
 {
-    "codename": "Gotthard", 
+    "rvmi_codename": "Augustiner", 
     "version": "1.6.0", 
-    "post": "0", 
-    "rc": "0"
+    "rvmi_version": "0.1", 
+    "codename": "Gotthard", 
+    "rc": "0", 
+    "post": "0"
 }
 """)
 

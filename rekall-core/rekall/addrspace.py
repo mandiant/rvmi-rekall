@@ -1,6 +1,7 @@
 # Rekall Memory Forensics
 # Copyright (C) 2007,2008 Volatile Systems
 # Copyright 2013 Google Inc. All Rights Reserved.
+# Copyright (C) 2017 FireEye, Inc. All Rights Reserved.
 #
 # Original Source:
 # Copyright (C) 2004,2005,2006 4tphi Research
@@ -144,7 +145,7 @@ class BaseAddressSpace(object):
     # False) then reads from the same offset MUST always return the same bytes.
     volatile = False
 
-    # This flag signifies whether this address space is for a virtual machine.
+    # This flag signifies whether this address space is for a nested virtual machine.
     virtualized = False
 
     def __init__(self, base=None, session=None, profile=None, **_):

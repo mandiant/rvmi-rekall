@@ -8,4 +8,6 @@ version_data:
   codename: Gotthard
   post: '0'
   rc: '0'
+  rvmi_codename: Augustiner
+  rvmi_version: '0.1'
   version: 1.6.0

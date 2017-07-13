@@ -1,5 +1,6 @@
 # Rekall Memory Forensics
 # Copyright 2016 Google Inc. All Rights Reserved.
+# Copyright (C) 2017 FireEye, Inc. All Rights Reserved.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,6 +35,7 @@ from rekall import kb
 
 from rekall.plugins.filesystems import ntfs
 from rekall.plugins.filesystems import tsk
+from rekall.plugins.addrspaces.qmp_as import QMPAddressSpace
 
 
 class NTFSMode(kb.ParameterHook):
@@ -168,3 +170,18 @@ class MountainLionMode(kb.ParameterHook):
     def calculate(self):
         return (self.session.profile.get_constant("_BootPML4", False) and
                 self.session.GetParameter("mode_darwin_memory"))
+
+class VMIMode(kb.ParameterHook):
+    """Support for VMI?"""
+    name = "mode_vmi"
+
+    def calculate(self):
+        return isinstance(self.session.physical_address_space, QMPAddressSpace)
+
+class VMIProfileMode(kb.ParameterHook):
+    """Is this a VMI profile?"""
+    name = "mode_vmi_profile"
+
+    def calculate(self):
+        return (self.session.HasParameter("profile") and
+                self.session.profile.name == "VMI")

@@ -1,4 +1,64 @@
-# The Rekall Forensic and Incident Response Framework
+![rVMI Logo](/resources/rvmi-rekall.png)
+
+# rVMI - Rekall
+
+This is a fork of the Rekall Forensic and Incident Response Framework
+that includes the **rVMI** extensions.
+
+In the following, we will provide a brief overview of rVMI with a focus
+on the Rekall extensions. If you are looking for the main rVMI repository
+please go to <https://github.com/fireeye/rvmi/>.
+
+If you are interested in Rekall go to <https://github.com/google/rekall/>
+or take a look at the Rekall section below.
+
+## About
+
+rVMI is a debugger on steroids. It leverages Virtual Machine Introspection (VMI)
+and memory forensics to provide full system analysis. This means that an analyst
+can inspect userspace processes, kernel drivers, and preboot environments in a
+single tool.
+
+It was specifially designed for interactive dynamic malware analysis. rVMI isolates
+itself from the malware by placing its interactive debugging environment out of the
+virtual machine (VM) onto the hypervisor-level. Through the use of VMI the analyst
+still has full control of the VM, which allows her to pause the VM at any point in
+time and to use typical debugging features such as breakpoints and watchpoints. In
+addtion, rVMI provides access to the entire Rekall feature set, which enables an
+analyst to inspect the kernel and its data structures with ease.
+
+## Installing Rekall with rVMI
+
+Before installing Rekall with rVMI, we recommend that you remove any previously
+installed versions of Rekall.
+
+Begin by cloning the repository:
+
+```
+$ git clone https://github.com/fireeye/rvmi-rekall.git rvmi-rekall
+```
+
+Then install Rekall.  We found that we had some issues when simply installing
+from the top level, so we recommend installing the rekall-agent and rekall-core
+components explicitly first.
+
+```
+$ cd rvmi-rekall/rekall-core
+$ sudo python ./setup.py install
+$ cd ../rekall-agent
+$ sudo python ./setup.py install
+$ cd ..
+$ sudo python ./setup.py install
+```
+
+You also require QEMU and KVM with rVMI extensions to run rVMI. You can find
+the full installation instructions at <https://github.com/fireeye/rvmi/>.
+
+## Using rVMI
+
+To run rVMI please follow the instructions located at <https://github.com/fireeye/rvmi/>.
+
+## The Rekall Forensic and Incident Response Framework
 
 The Rekall Framework is a completely open collection of tools,
 implemented in Python under the Apache and GNU General Public License,
@@ -23,55 +83,11 @@ images:
 Rekall also provides a complete memory sample acquisition capability for all
 major operating systems (see the tools directory).
 
-## Quick start
-
-Rekall is available as a python package installable via the pip
-package manager. To install it, first create a virtal env, switch to
-it and then install rekall:
-
-```
-$ virtualenv  /tmp/MyEnv
-New python executable in /tmp/MyEnv/bin/python
-Installing setuptools, pip...done.
-$ source /tmp/MyEnv/bin/activate
-$ pip install --upgrade setuptools pip wheel
-$ pip install rekall-agent
-```
-
-For windows, Rekall is also available as a self contained installer
-package. Please check the download page for the most appropriate installer to
-use [Rekall-Forensic.com](http://www.rekall-forensic.com/)
-
-To install from this git repository you will need to use pip
---editable and follow the correct order of installation (otherwise pip
-will pull released depedencies which might be older):
-
-```
-$ virtualenv  /tmp/MyEnv
-New python executable in /tmp/MyEnv/bin/python
-Installing setuptools, pip...done.
-$ source /tmp/MyEnv/bin/activate
-$ pip install --upgrade setuptools pip wheel
-$ pip install --editable rekall/rekall-core
-$ pip install --editable rekall/rekall-agent
-$ pip install --editable rekall
-```
-
-On Windows you will need to install the Microsoft Visual C compilers
-for python (for more info see this blog post
-http://rekall-forensic.blogspot.ch/2015/09/installing-rekall-on-windows.html)
-
-## Mailing Lists
-
-Mailing lists to support the users and developers of Rekall
-can be found at the following address:
-
-    rekall-discuss@googlegroups.com
-
 ## Licensing and Copyright
 
-Copyright (C) 2007-2011 Volatile Systems
-Copyright 2012-2016 Google Inc. All Rights Reserved.
+Copyright (C) 2007-2011 Volatile Systems  
+Copyright 2012-2016 Google Inc. All Rights Reserved.  
+Copyright 2017 FireEye, Inc. All Rights Reserved.
 
 All Rights Reserved
 
@@ -90,54 +106,34 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 02111-1307, USA.
 
-
 ## Bugs and Support
 
-There is no support provided with Rekall. There is NO
+There is no support provided. There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR
 PURPOSE.
 
-If you think you've found a bug, please report it at:
+If you think you've found a bug particular to rvmi-rekall, please report it at:
 
-    https://github.com/google/rekall/issues
+https://github.com/fireeye/rvmi-rekall/issues
 
 In order to help us solve your issues as quickly as possible,
 please include the following information when filing a bug:
 
-* The version of rekall you're using
-* The operating system used to run rekall
-* The version of python used to run rekall
-* The suspected operating system of the memory image
-* The complete command line you used to run rekall
+* The version of rvmi-rekall you're using
+* The guest operating system you are analyzing
+* The complete command line you used to run rvmi-rekall
+* The exact steps required to reproduce the issue
 
-## History
+If you think you have found a bug in one of the other rvmi components, please report appropriately:
 
-In December 2011, a new branch within the Volatility project was created to
-explore how to make the code base more modular, improve performance, and
-increase usability. The modularity allowed Volatility to be used in GRR, making
-memory analysis a core part of a strategy to enable remote live forensics.  As a
-result, both GRR and Volatility would be able to use each others’ strengths.
+https://github.com/fireeye/rvmi-qemu/issues  
+https://github.com/fireeye/rvmi-kvm/issues
 
-Over time this branch has become known as the "scudette" branch or the
-"Technology Preview" branch.  It was always a goal to try to get these changes
-into the main Volatility code base.  But, after two years of ongoing
-development, the "Technology Preview" was never accepted into the Volatility
-trunk version.
+If you are not sure or would like to file a general bug, please report here:
 
-Since it seemed unlikely these changes would be incorporated in the future, it
-made sense to develop the Technology Preview branch as a separate project. On
-December 13, 2013, the former branch was forked to create a new stand-alone
-project named "Rekall.” This new project incorporates changes made to streamline
-the codebase so that Rekall can be used as a library. Methods for memory
-acquisition and other outside contributions have also been included that were
-not in the Volatility codebase.
-
-Rekall strives to advance the state of the art in memory analysis, implementing
-the best algorithms currently available and a complete memory acquisition and
-analysis solution for at least Windows, OSX and Linux.
-
+https://github.com/fireeye/rvmi/issues
 
 ## More documentation
 
 Further documentation is available at
-http://www.rekall-forensic.com/
+https://github.com/fireeye/rvmi/

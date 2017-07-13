@@ -143,7 +143,9 @@ def update(args):
     if (args.version is None and
             args.post is None and
             args.rc is None and
-            args.codename is None):
+            args.codename is None and
+            args.rvmi_version is None and
+            args.rvmi_codename is None):
         raise AttributeError("You must set something in this release.")
 
     data, version_path = get_config_file(args.version_file)
@@ -159,6 +161,12 @@ def update(args):
 
     if args.codename:
         version_data["codename"] = args.codename
+
+    if args.rvmi_version:
+        version_data["rvmi_version"] = args.rvmi_version
+
+    if args.rvmi_codename:
+        version_data["rvmi_codename"] = args.rvmi_codename
 
     # Write the updated version_data into the file.
     with open(version_path, "wb") as fd:
@@ -202,6 +210,11 @@ def main():
     update_parser.add_argument(
         "--codename", help="Set to this new codename.")
 
+    update_parser.add_argument(
+        "--rvmi-version", help="Set to this new rVMI version.")
+
+    update_parser.add_argument(
+        "--rvmi-codename", help="Set to this new rVMI codename.")
 
     subparsers.add_parser("version", help="Report the current version.")
 
