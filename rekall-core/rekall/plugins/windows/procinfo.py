@@ -1,6 +1,7 @@
 # Rekall Memory Forensics
 # Copyright (C) 2012 Michael Cohen
 # Copyright 2013 Google Inc. All Rights Reserved.
+# Copyright (C) 2017 FireEye, Inc. All Rights Reserved.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -100,6 +101,9 @@ class PEInfo(plugin.TypedProfileCommand, plugin.Command):
 
         renderer.table_row("GUID/Age", self.pe_helper.RSDS.GUID_AGE)
         renderer.table_row("PDB", self.pe_helper.RSDS.Filename)
+        aoep = self.pe_helper.nt_header.OptionalHeader.AddressOfEntryPoint
+        renderer.table_row("AddressOfEntryPoint",
+                           "{0} ({1})".format("0x%x" % aoep, "-" if aoep == 0 else "0x%x" % (self.plugin_args.image_base + aoep)))
 
         for field in ["MajorOperatingSystemVersion",
                       "MinorOperatingSystemVersion",

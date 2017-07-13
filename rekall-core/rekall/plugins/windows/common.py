@@ -1,6 +1,7 @@
 # Rekall Memory Forensics
 #
 # Copyright 2013 Google Inc. All Rights Reserved.
+# Copyright (C) 2017 FireEye, Inc. All Rights Reserved.
 #
 # Authors:
 # Michael Cohen <scudette@users.sourceforge.net>
@@ -428,6 +429,10 @@ class WinProcessFilter(WindowsCommandPlugin):
              default=plugin.Sentinel(),
              help="One or more pids of processes to select."),
 
+        dict(name="dtbs", default=None, type="ArrayIntParser",
+             default=plugin.Sentinel(),
+             help="One or more DTBs of processes to select."),
+
         dict(name="proc_regex", default=None, type="RegEx",
              help="A regex to select a process by name."),
 
@@ -439,7 +444,8 @@ class WinProcessFilter(WindowsCommandPlugin):
     def filtering_requested(self):
         return (not isinstance(self.plugin_args.pids, plugin.Sentinel) or
                 self.plugin_args.proc_regex is not None or
-                not isinstance(self.plugin_args.eprocess, plugin.Sentinel))
+                not isinstance(self.plugin_args.eprocess, plugin.Sentinel) or
+                not isinstance(self.plugin_args.dtbs, plugin.Sentinel))
 
     def filter_processes(self):
         """Filters eprocess list using pids lists."""
@@ -455,6 +461,10 @@ class WinProcessFilter(WindowsCommandPlugin):
 
                 elif not isinstance(self.plugin_args.pids, plugin.Sentinel):
                     if int(proc.pid) in self.plugin_args.pids:
+                        yield proc
+
+                elif not isinstance(self.plugin_args.dtbs, plugin.Sentinel):
+                    if int(proc.Pcb.DirectoryTableBase) in self.plugin_args.dtbs:
                         yield proc
 
                 elif (self.plugin_args.proc_regex and

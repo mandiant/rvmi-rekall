@@ -1,6 +1,7 @@
 # Rekall Memory Forensics
 # Copyright (C) 2012 Michael Cohen
 # Copyright 2013 Google Inc. All Rights Reserved.
+# Copyright (C) 2017 FireEye, Inc. All Rights Reserved.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -986,6 +987,24 @@ class PluginMetadataDatabase(object):
         # is an error to have multiple implementations active at the same
         # time.
         if len(results) > 1:
+            # Allow the overloading of plugins if one of the plugins is a
+            # subclass of all other
+            target = None
+
+            for p in results:
+                if target == None:
+                    target = p
+                elif issubclass(target.plugin_cls, p.plugin_cls):
+                    continue
+                elif issubclass(p.plugin_cls, target.plugin_cls):
+                    target = p
+                else:
+                    target = None
+                    break
+
+            if target != None:
+                return target
+
             raise RuntimeError("Multiple plugin implementations for %s: %s" % (
                 plugin_name, [x.plugin_cls for x in results]))
 

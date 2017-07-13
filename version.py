@@ -143,7 +143,6 @@ TEMPLATES = [
     "debian/changelog.in"
 ]
 
-
 def update_templates(version_data):
     version_data["debian_ts"] = arrow.utcnow().format(
         'ddd, D MMM YYYY h:mm:ss Z')
@@ -154,7 +153,6 @@ def update_templates(version_data):
         target = path[:-3]
         with open(target, "wt") as outfd:
             outfd.write(open(path, "rt").read() % version_data)
-
 
 def update_version_files(args):
     data, version_path = get_config_file(args.version_file)
@@ -170,6 +168,12 @@ def update_version_files(args):
 
     if args.codename:
         version_data["codename"] = args.codename
+
+    if args.rvmi_version:
+        version_data["rvmi_version"] = args.rvmi_version
+
+    if args.rvmi_codename:
+        version_data["rvmi_codename"] = args.rvmi_codename
 
     # Write the updated version_data into the file.
     with open(version_path, "wt") as fd:
@@ -198,11 +202,12 @@ def update(args):
     if (args.version is None and
             args.post is None and
             args.rc is None and
-            args.codename is None):
+            args.codename is None and
+            args.rvmi_version is None and
+            args.rvmi_codename is None):
         raise AttributeError("You must set something in this release.")
 
     update_version_files(args)
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -225,6 +230,11 @@ def main():
     update_parser.add_argument(
         "--codename", help="Set to this new codename.")
 
+    update_parser.add_argument(
+        "--rvmi-version", help="Set to this new rVMI version.")
+
+    update_parser.add_argument(
+        "--rvmi-codename", help="Set to this new rVMI codename.")
 
     subparsers.add_parser("version", help="Report the current version.")
 

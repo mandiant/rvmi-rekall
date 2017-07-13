@@ -12,6 +12,8 @@ def get_versions():
 def raw_versions():
     return json.loads("""
 {
+    "rvmi_codename": "Augustiner",
+    "rvmi_version": "0.1",
     "codename": "Hurricane Ridge",
     "post": "0",
     "rc": "1",

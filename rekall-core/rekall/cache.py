@@ -1,9 +1,27 @@
+# Rekall Memory Forensics
+# Copyright (C) 2017 FireEye, Inc. All Rights Reserved.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+#
+
 from future import standard_library
 standard_library.install_aliases()
 from builtins import str
 from builtins import object
 import pickle
 import io
+
 import os
 import six
 import time
@@ -310,6 +328,48 @@ class FileCache(Cache):
             return "<FileCache (unbacked)>"
 
 
+class PeriodicCache(Cache):
+    """A cache which has elements that are periodially flushed.
+    """
+
+    def __init__(self, session):
+        super(PeriodicCache, self).__init__(session)
+        if(self.session.vmi is None):
+            raise ValueError("session missing vmi param")
+
+    def Get(self, item, default=None):
+        return self.data.get(item, default)
+
+    def Set(self, item, value, volatile=True):
+        _ = volatile
+        if value is None:
+            self.data.pop(item, None)
+        else:
+            self.data[item] = value
+
+    def Period(self):
+        for k,v in self.data.items():
+            if(self.session.vmi.cache_period_flush(k)):
+                del self.data[k]
+        
+    def __str__(self):
+        """Print the contents somewhat concisely."""
+        result = []
+        for k, v in self.data.items():
+            if isinstance(v, obj.BaseObject):
+                v = repr(v)
+
+            value = "\n  ".join(str(v).splitlines())
+            if len(value) > 100:
+                value = "%s ..." % value[:100]
+
+            result.append("  %s = %s" % (k, value))
+
+        return "{\n" + "\n".join(sorted(result)) + "\n}"
+
+
+
+
 class SessionIndex(object):
     def __init__(self, name, tests):
         self.name = name
@@ -366,5 +426,8 @@ def Factory(session, cache_type):
 
     if cache_type == "file":
         return FileCache(session)
+
+    if cache_type == "periodic":
+        return PeriodicCache(session)
 
     return Cache(session)
