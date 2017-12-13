@@ -429,7 +429,7 @@ class WinProcessFilter(WindowsCommandPlugin):
              default=plugin.Sentinel(),
              help="One or more pids of processes to select."),
 
-        dict(name="dtbs", default=None, type="ArrayIntParser",
+        dict(name="dtbs", positional=False, type="ArrayIntParser",
              default=plugin.Sentinel(),
              help="One or more DTBs of processes to select."),
 
