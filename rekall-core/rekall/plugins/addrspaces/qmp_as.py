@@ -29,7 +29,7 @@ class QMPAddressSpace(addrspace.BaseAddressSpace):
 
     __abstract = False
     __name = "qmp"
-    order = 99
+    order = 0
     __image = True
 
     def __init__(self, base=None, filename=None, session=None, **kwargs):
