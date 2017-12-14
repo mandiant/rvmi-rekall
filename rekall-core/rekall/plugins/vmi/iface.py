@@ -19,15 +19,15 @@
 #
 
 
-from rekall import utils
+from rekall_lib import utils
 from rekall import addrspace
 
-from qmp import QEMUMonitorProtocol
-from qmp import QMPTimeoutError
+from rekall.plugins.vmi.qmp import QEMUMonitorProtocol
+from rekall.plugins.vmi.qmp import QMPTimeoutError
 
-from event import EventHandler
+from .event import EventHandler
 
-from common import GuestState, vmi_init
+from .common import GuestState, vmi_init
 from rekall.plugins.windows.vmi import WindowsGuestState
 
 import mmap
@@ -211,7 +211,7 @@ class QMPVMI(VMIInterface):
     def get_cpu_state(self,cpu_num):
         #qemu qtypes dont implement unsigned ints
         def make_uint(d):
-            for k,v in d.iteritems():
+            for k,v in iter(d.items()):
                 if type(v) is dict:
                     make_uint(v)
                 elif v < 0:
@@ -222,7 +222,7 @@ class QMPVMI(VMIInterface):
 
     def set_cpu_state(self,cpu_num,state):
         def make_int(d):
-            for k,v in d.iteritems():
+            for k,v in iter(d.items()):
                 if type(v) is dict:
                     make_int(v)
                 elif (v & 0x8000000000000000):
@@ -248,7 +248,7 @@ class QMPVMI(VMIInterface):
 
         def make_uint(d):
             if type(d) is dict:
-                for k,v in d.iteritems():
+                for k,v in iter(d.items()):
                     if type(v) is dict:
                         make_uint(v)
                     elif type(v) is list:
@@ -419,7 +419,7 @@ class QMPVMI(VMIInterface):
         num_pages = int(math.ceil(float((offset & PAGE_MASK) + size) / float(PAGE_SZ)))
         start_page = offset >> PAGE_BITS
 
-        buf = ""
+        buf = b""
         remaining_size = size
         for i, page in enumerate(self.get_pages(start_page,num_pages)):
             page_offset = (start_page+i) << PAGE_BITS

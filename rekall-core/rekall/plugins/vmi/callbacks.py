@@ -20,7 +20,7 @@
 
 
 """ VMI event callbacks. """
-from event import Callback, EventHandler, EventType
+from .event import Callback, EventHandler, EventType
 
 
 def callbacks_init(vmi):

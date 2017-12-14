@@ -20,10 +20,9 @@
 
 
 """ This file contains the core classes used by VMI plugins. """
-
+from rekall_lib import utils
 from rekall import addrspace
 from rekall import plugin
-from rekall import utils
 from rekall.plugins import core
 from rekall.plugins.common import address_resolver
 
@@ -34,7 +33,8 @@ import struct
 import string
 import tempfile
 
-from callbacks import callbacks_init
+from .callbacks import callbacks_init
+from rekall import addrspace
 
 # Called by the VMI interface once a connection is ready
 def vmi_init(vmi):

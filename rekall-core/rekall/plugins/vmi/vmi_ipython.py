@@ -92,14 +92,14 @@ class QmpMagics(Magics):
             qmp_cmd_obj = {"execute":cmd}
 
         q = session.vmi._qmp
-        print json.dumps(qmp_cmd_obj)
-        print q.cmd_obj(qmp_cmd_obj)
+        print(json.dumps(qmp_cmd_obj))
+        print(q.cmd_obj(qmp_cmd_obj))
 
 class VmiIPython(object):
     __metaclass__ = Singleton
 
     def __init__(self, session):
-	self._session = session
+        self._session = session
 
     @property
     def session(self):

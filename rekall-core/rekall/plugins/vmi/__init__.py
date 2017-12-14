@@ -18,6 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
-from rekall.plugins.vmi import common
-from rekall.plugins.vmi import iface
-from rekall.plugins.vmi import vmi_ipython
+#from rekall.plugins.vmi import common
+#from rekall.plugins.vmi import iface
+#from rekall.plugins.vmi import vmi_ipython

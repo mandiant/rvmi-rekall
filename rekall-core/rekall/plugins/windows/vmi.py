@@ -22,8 +22,8 @@
 """ VMI classes and commands that are specific for Windows."""
 import struct
 
+from rekall_lib import utils
 from rekall import scan
-from rekall import utils
 from rekall.plugins.vmi import common as vmi_common
 from rekall.plugins.windows import common as win_common
 from rekall.plugins.windows.kpcr import KPCR

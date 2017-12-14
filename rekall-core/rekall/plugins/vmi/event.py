@@ -26,7 +26,7 @@ import socket
 from enum import IntEnum
 
 from rekall.session import InteractiveSession
-from utils import Registry
+from .utils import Registry
 
 class EventTypeMeta(type):
     def __getattribute__(cls, key):
@@ -39,7 +39,6 @@ class EventTypeMeta(type):
 
         # Not part of the class. Check the enum.
         if cls._enum == None:
-
             value_list = Event.event_names()
             result = {}
             i = 1
@@ -58,9 +57,7 @@ class EventTypeMeta(type):
     def __getitem__(cls, key):
         return cls._enum.__getitem__(key)
 
-class EventType(object):
-    __metaclass__ = EventTypeMeta
-
+class EventType(object, metaclass=EventTypeMeta):
     _enum = None
 
     @classmethod
@@ -79,10 +76,8 @@ class EventType(object):
     def from_string(cls, s):
         return cls[s]
 
-class Event(object):
+class Event(object, metaclass=Registry):
     """ Represents an event. """
-
-    __metaclass__ = Registry
 
     # Used to identify the event type in a json string/dict
     _name = ""
@@ -148,14 +143,14 @@ class Event(object):
     def event_names(cls):
         result = []
 
-        for k, v in cls.registry.iteritems():
+        for k, v in iter(cls.registry.items()):
             result.append(v._name)
 
         return result
 
     @classmethod
     def from_dict(cls, d):
-        for k, v in cls.registry.iteritems():
+        for k, v in iter(cls.registry.items()):
             if d["event"].lower() == v._name.lower():
                 return v(EventType.from_string(d["event"]), d)
 
