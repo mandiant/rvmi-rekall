@@ -20,6 +20,8 @@
 
 
 """This module implements the rVMI event handling."""
+from future.utils import with_metaclass
+
 import datetime
 import socket
 
@@ -57,7 +59,7 @@ class EventTypeMeta(type):
     def __getitem__(cls, key):
         return cls._enum.__getitem__(key)
 
-class EventType(object, metaclass=EventTypeMeta):
+class EventType(with_metaclass(EventTypeMeta, object)):
     _enum = None
 
     @classmethod
@@ -76,7 +78,7 @@ class EventType(object, metaclass=EventTypeMeta):
     def from_string(cls, s):
         return cls[s]
 
-class Event(object, metaclass=Registry):
+class Event(with_metaclass(Registry, object)):
     """ Represents an event. """
 
     # Used to identify the event type in a json string/dict
